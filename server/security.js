@@ -290,10 +290,10 @@ function checkJwtSecret() {
 
 function securityHeaders(req, res, next) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  // Removed X-Frame-Options so the game can be embedded on itch.io. Use CSP frame-ancestors instead.
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=(), payment=()');
-  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
@@ -303,6 +303,7 @@ function securityHeaders(req, res, next) {
     "media-src 'self' https://www.youtube.com",
     "connect-src 'self' ws: wss: https://*.paypal.com https://*.paypalobjects.com",
     "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://*.paypal.com",
+    "frame-ancestors 'self' https://*.itch.io https://*.itch.zone https://html-classic.itch.zone",
     "font-src 'self' data: https://fonts.gstatic.com https://*.paypalobjects.com",
     "object-src 'none'",
     "base-uri 'self'",
