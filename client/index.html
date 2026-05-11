@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Monster MMORPG</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Login-Bildschirm -->
+  <div id="login-screen" class="overlay">
+    <div class="panel">
+      <h1>Monster MMORPG</h1>
+      <p>Trainername eingeben und die Welt betreten:</p>
+      <input id="name-input" type="text" maxlength="16" placeholder="z.B. Volkan" autocomplete="off" />
+      <button id="login-btn">Spiel starten</button>
+      <p class="hint">Pfeiltasten = Bewegen &middot; Enter = Chat &middot; Hohes Gras = wilde Monster</p>
+    </div>
+  </div>
+
+  <!-- Spielwelt -->
+  <div id="game-root" class="hidden">
+    <canvas id="game-canvas" width="640" height="480"></canvas>
+
+    <div id="hud">
+      <div id="player-info">Lade...</div>
+    </div>
+
+    <div id="chat">
+      <div id="chat-log"></div>
+      <input id="chat-input" type="text" maxlength="200" placeholder="Druecke Enter zum Chatten..." />
+    </div>
+
+    <!-- Battle-Overlay -->
+    <div id="battle-overlay" class="overlay hidden">
+      <div class="battle-panel">
+        <div class="battle-side wild">
+          <div class="mon-name" id="wild-name">?</div>
+          <div class="mon-level" id="wild-level">Lv.?</div>
+          <div class="hp-bar"><div class="hp-fill" id="wild-hp"></div></div>
+        </div>
+        <div class="battle-side player">
+          <div class="mon-name" id="player-name">?</div>
+          <div class="mon-level" id="player-level">Lv.?</div>
+          <div class="hp-bar"><div class="hp-fill" id="player-hp"></div></div>
+          <div class="hp-text" id="player-hp-text"></div>
+          <div class="exp-bar"><div class="exp-fill" id="player-exp"></div></div>
+        </div>
+        <div id="battle-log"></div>
+        <div id="battle-actions">
+          <div id="move-buttons"></div>
+          <button id="flee-btn">Fliehen</button>
+          <button id="continue-btn" class="hidden">Weiter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/network.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/battle.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

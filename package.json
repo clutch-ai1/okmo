@@ -1,0 +1,22 @@
+{
+  "name": "pokemon-mmo-catcher",
+  "version": "1.0.0",
+  "description": "Multiplayer Pokemon Idle Catcher - private learning project",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cookie-signature": "^1.2.2",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
