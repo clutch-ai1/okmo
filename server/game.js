@@ -171,12 +171,13 @@ function resolveCurrentSpawn() {
   }
   let firstCatcherUserId = null;
   for (const [userId, attempt] of entries) {
-    let caught = false; let bonus = null;
+    let caught = false; let bonus = null; let caughtId = null;
     if (attempt.ball) {
       caught = rollCatchSuccess(pokemon, attempt.ivs, attempt.ball);
       if (caught) {
         const ivT = ivTotal(attempt.ivs);
-        stmt.insertCaught.run(userId, pokemon.id, JSON.stringify(attempt.ivs), ivT, attempt.isShiny ? 1 : 0, attempt.ball, now, JSON.stringify(attempt.moves || []));
+        const ins = stmt.insertCaught.run(userId, pokemon.id, JSON.stringify(attempt.ivs), ivT, attempt.isShiny ? 1 : 0, attempt.ball, now, JSON.stringify(attempt.moves || []));
+        caughtId = ins && ins.lastInsertRowid != null ? ins.lastInsertRowid : null;
         stmt.incrementCatches.run(userId);
         bonus = awardCatchBonus(userId);
         if (firstCatcherUserId === null) firstCatcherUserId = userId;
@@ -193,7 +194,7 @@ function resolveCurrentSpawn() {
       eggDrop = { tier: eggTierId, name: EGG_TIERS[eggTierId].name, eggId: newEgg ? newEgg.id : null };
     }
     stmt.resolveAttempt.run(caught ? 1 : 0, now, spawn.id, userId);
-    results.push({ userId, caught, ball: attempt.ball, ivs: attempt.ivs, isShiny: attempt.isShiny, bonus, gold, moves: attempt.moves, eggDrop });
+    results.push({ userId, caught, caughtId, ball: attempt.ball, ivs: attempt.ivs, isShiny: attempt.isShiny, bonus, gold, moves: attempt.moves, eggDrop });
   }
   const progressionByUser = {};
   for (const r of results) {

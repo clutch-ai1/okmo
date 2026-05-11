@@ -250,8 +250,11 @@ const Net = (function () {
       // Append caught locally if successful
       if (msg.result && msg.result.caught) {
         const p = GameData.POKEMON_BY_ID[msg.pokemonId];
+        // Use the real caughtId from the server so it matches the DB row.
+        // Fallback to a string placeholder only if the server didn't send one (older deploys).
+        const realId = msg.result.caughtId;
         const inst = {
-          id: 'live_' + Date.now(),
+          id: (realId != null) ? realId : ('live_' + Date.now()),
           pokemonId: msg.pokemonId,
           ivs: msg.result.ivs,
           ivTotal: ivTotalFromObj(msg.result.ivs),
@@ -259,6 +262,8 @@ const Net = (function () {
           ball: msg.result.ball,
           caughtAt: Date.now(),
           moves: msg.result.moves || [],
+          level: 5,
+          xp: 0,
           upgrades: 0,
         };
         state.caught.unshift(inst);
