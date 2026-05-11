@@ -879,6 +879,11 @@ wss.on('connection', (ws, req) => {
         const target = msg.userId ? stmt.getUserById.get(msg.userId)
                      : (msg.username ? stmt.getUserByName.get(msg.username)
                      : stmt.getUserById.get(u.id));
+        // Hidden users (admin, test accounts) are invisible to everyone except themselves.
+        const { isHiddenUser } = require('./db');
+        if (target && isHiddenUser(target.username) && target.id !== u.id) {
+          return send(ws, { type: 'profile', profile: null });
+        }
         send(ws, { type: 'profile', profile: publicProfile(target) });
       } catch (e) {
         console.error('[request_profile] error:', e && e.message);
@@ -909,10 +914,13 @@ wss.on('connection', (ws, req) => {
     }
     // ---------- Market / Trade House ----------
     if (msg.type === 'request_market') {
+      const { isHiddenUser } = require('./db');
       const listings = stmt.getAllListings.all().map(l => {
         const c = stmt.getOneCaught.get(l.caughtId, l.sellerId);
         const seller = stmt.getUserById.get(l.sellerId);
         if (!c || !seller) return null;
+        // Skip listings from hidden users (admin / test accounts)
+        if (isHiddenUser(seller.username)) return null;
         return {
           id: l.id, currency: l.currency, price: l.price, listedAt: l.listedAt,
           sellerId: l.sellerId, sellerName: seller.username, sellerGender: seller.gender || 'male',

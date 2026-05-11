@@ -146,9 +146,10 @@ function getTotalDamage() {
 
 function getLeaderboard(limit) {
   if (!currentBoss) return [];
+  const { isHiddenUser } = require('./db');
   const list = [];
   for (const [userId, p] of currentBoss.participants) {
-    if (p.username === 'admin') continue;
+    if (isHiddenUser(p.username)) continue;
     list.push({ userId, username: p.username, damage: p.damage });
   }
   list.sort((a, b) => b.damage - a.damage);

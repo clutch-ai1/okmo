@@ -3,6 +3,15 @@ const fs = require('fs');
 const path = require('path');
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'data.json');
 
+// Accounts that should never appear in any public listing or leaderboard.
+// The admin account is hidden by default; additional test accounts can be added here
+// or via the HIDDEN_USERS env var (comma-separated).
+const HIDDEN_USERS = new Set(
+  ['admin', 'claudetest']
+    .concat((process.env.HIDDEN_USERS || '').split(',').map(s => s.trim()).filter(Boolean))
+);
+function isHiddenUser(username) { return HIDDEN_USERS.has(username); }
+
 let data = {
   users: [], caughtPokemon: [], chatMessages: [], spawns: [], spawnAttempts: [],
   bugReports: [], feedback: [],
@@ -211,7 +220,7 @@ const stmt = {
     save();
     return true;
   }},
-  getAllUsers: { all: () => data.users.filter(u => u.username !== 'admin').map(u => ({ id: u.id, username: u.username, level: u.level, title: u.title, gender: u.gender, totalCatches: u.total_catches, towerBestFloor: u.tower_best_floor })) },
+  getAllUsers: { all: () => data.users.filter(u => !isHiddenUser(u.username)).map(u => ({ id: u.id, username: u.username, level: u.level, title: u.title, gender: u.gender, totalCatches: u.total_catches, towerBestFloor: u.tower_best_floor })) },
   // Admin: full user listing with stats, balls, currencies, ban state
   getAllUsersAdmin: { all: () => data.users.map(u => ({
     id: u.id, username: u.username, level: u.level || 1, gender: u.gender || 'male',
@@ -313,13 +322,12 @@ const stmt = {
     }
     return Object.entries(counts).map(([pokemon_id, cnt]) => ({ pokemon_id, cnt }));
   }},
-  topByCatches: { all: () => data.users.filter(u => (u.total_catches||0) > 0 && u.username !== 'admin').sort((a,b) => b.total_catches-a.total_catches).slice(0,50).map(u => ({ id:u.id, username:u.username, total_catches:u.total_catches })) },
+  topByCatches: { all: () => data.users.filter(u => (u.total_catches||0) > 0 && !isHiddenUser(u.username)).sort((a,b) => b.total_catches-a.total_catches).slice(0,50).map(u => ({ id:u.id, username:u.username, total_catches:u.total_catches })) },
   topByIv: { all: () => {
     const best = new Map();
-    const adminUser = data.users.find(u => u.username === 'admin');
-    const adminId = adminUser ? adminUser.id : -1;
+    const hiddenIds = new Set(data.users.filter(u => isHiddenUser(u.username)).map(u => u.id));
     for (const c of data.caughtPokemon) {
-      if (c.user_id === adminId) continue;
+      if (hiddenIds.has(c.user_id)) continue;
       const cur = best.get(c.user_id);
       if (!cur || c.iv_total > cur.iv) best.set(c.user_id, { iv: c.iv_total, pokemon_id: c.pokemon_id });
     }
@@ -358,10 +366,9 @@ const stmt = {
   }},
   topByPokedex: { all: () => {
     const species = new Map();
-    const adminUser = data.users.find(u => u.username === 'admin');
-    const adminId = adminUser ? adminUser.id : -1;
+    const hiddenIds = new Set(data.users.filter(u => isHiddenUser(u.username)).map(u => u.id));
     for (const c of data.caughtPokemon) {
-      if (c.user_id === adminId) continue;
+      if (hiddenIds.has(c.user_id)) continue;
       if (!species.has(c.user_id)) species.set(c.user_id, new Set());
       species.get(c.user_id).add(c.pokemon_id);
     }
@@ -372,4 +379,4 @@ const stmt = {
   }},
 };
 
-module.exports = { db: { close: () => save() }, stmt, data, save, beginBatch, endBatch };
+module.exports = { db: { close: () => save() }, stmt, data, save, beginBatch, endBatch, isHiddenUser };
