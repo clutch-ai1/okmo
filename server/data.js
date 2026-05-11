@@ -268,6 +268,7 @@ module.exports = {
   xpForLevelUp, totalXpForLevel, levelFromTotalXp, xpForCatch, levelUpReward,
   DAILY_QUEST_DEFS, pickDailyQuests, questDef, ACHIEVEMENT_DEFS,
   POKEMON_MAX_LEVEL, pokemonXpForLevelUp, pokemonXpFromCatch, applyXpToPokemon,
+  EVOLUTIONS, getEvolution,
   EGG_TIERS, INCUBATOR_TIERS, rollEggHatch, rollEggDropFromCatch, rollEggDropFromBattle,
   rollMoveset, MOVES,
 };
